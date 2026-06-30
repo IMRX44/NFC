@@ -1,0 +1,4 @@
+-keep class com.nfcsecurity.analyzer.** { *; }
+-keep class com.google.gson.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*

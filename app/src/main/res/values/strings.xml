@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NFC Security Analyzer</string>
+    <string name="nfc_not_supported">NFC not supported on this device</string>
+    <string name="nfc_disabled">NFC is disabled — enable it in Settings</string>
+    <string name="nfc_ready">NFC Ready — Hold card near the back of your device</string>
+    <string name="hold_card_near">Hold NFC Card Near Device</string>
+    <string name="tap_to_scan_desc">Position your card behind the phone.\nThe scan starts automatically.</string>
+    <string name="analyzing_card">Analyzing card security…</string>
+    <string name="try_again">Try Again</string>
+    <string name="view_scan_history">View Scan History</string>
+    <string name="scan_history">Scan History</string>
+    <string name="export_report">Export Report</string>
+    <string name="no_ndef_records">No NDEF records found on this card</string>
+    <string name="card_details">Card Details</string>
+    <string name="security_disclaimer">This tool performs read-only analysis for authorized security assessment only.</string>
+</resources>
