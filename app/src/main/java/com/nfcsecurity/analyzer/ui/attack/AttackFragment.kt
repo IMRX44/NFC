@@ -9,7 +9,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import com.nfcsecurity.analyzer.R
 import com.nfcsecurity.analyzer.databinding.FragmentAttackBinding
 import com.nfcsecurity.analyzer.ui.MainViewModel
@@ -23,8 +22,8 @@ class AttackFragment : Fragment() {
     private var _binding: FragmentAttackBinding? = null
     private val binding get() = _binding!!
     private val mainViewModel: MainViewModel by activityViewModels()
-    private lateinit var attackViewModel: AttackViewModel
-    private lateinit var consoleViewModel: ConsoleViewModel
+    private val attackViewModel: AttackViewModel by activityViewModels()
+    private val consoleViewModel: ConsoleViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -35,8 +34,6 @@ class AttackFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        attackViewModel = ViewModelProvider(this)[AttackViewModel::class.java]
-        consoleViewModel = ViewModelProvider(requireActivity())[ConsoleViewModel::class.java]
 
         observeViewModel()
         setupClickListeners()
@@ -79,8 +76,6 @@ class AttackFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        val tag = getCurrentTag()
-
         binding.btnDictAttack.setOnClickListener {
             requireTag { t -> attackViewModel.runDictionaryAttack(t) }
         }
@@ -198,13 +193,10 @@ class AttackFragment : Fragment() {
         }
     }
 
-    private fun getCurrentTag() = (mainViewModel.scanState.value as? ScanState.Success)
-        ?.report?.cardInfo
-
     private fun requireTag(block: (android.nfc.Tag) -> Unit) {
-        val tag = attackViewModel.currentTag
+        val tag = attackViewModel.currentTag ?: mainViewModel.lastTag
         if (tag == null) {
-            toast("No NFC tag connected — scan a tag first")
+            toast("No NFC tag — tap tag to phone first")
         } else {
             block(tag)
         }

@@ -3,11 +3,14 @@ package com.nfcsecurity.analyzer.ui.console
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
-class ConsoleViewModel : ViewModel() {
+@HiltViewModel
+class ConsoleViewModel @Inject constructor() : ViewModel() {
 
     private val _output = MutableLiveData<String>("")
     val output: LiveData<String> = _output

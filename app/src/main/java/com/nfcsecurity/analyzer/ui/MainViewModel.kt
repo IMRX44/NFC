@@ -31,6 +31,9 @@ class MainViewModel @Inject constructor(
     private val _scanState = MutableLiveData<ScanState>(ScanState.Idle)
     val scanState: LiveData<ScanState> = _scanState
 
+    var lastTag: Tag? = null
+        private set
+
     private val _scanHistory = MutableLiveData<List<ScanHistoryEntity>>(emptyList())
     val scanHistory: LiveData<List<ScanHistoryEntity>> = _scanHistory
 
@@ -41,6 +44,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun processNfcTag(tag: Tag) {
+        lastTag = tag
         viewModelScope.launch(Dispatchers.IO) {
             _scanState.postValue(ScanState.Scanning)
             try {

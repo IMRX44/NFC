@@ -6,14 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import com.nfcsecurity.analyzer.databinding.FragmentConsoleBinding
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ConsoleFragment : Fragment() {
 
     private var _binding: FragmentConsoleBinding? = null
     private val binding get() = _binding!!
-    private lateinit var consoleViewModel: ConsoleViewModel
+    private val consoleViewModel: ConsoleViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -24,7 +26,6 @@ class ConsoleFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        consoleViewModel = ViewModelProvider(requireActivity())[ConsoleViewModel::class.java]
 
         consoleViewModel.output.observe(viewLifecycleOwner) { text ->
             binding.tvConsoleOutput.text = text
