@@ -81,7 +81,7 @@ class NfcCardReader @Inject constructor() {
     }
 
     private fun identifyDesfireVariant(sak: Byte?): CardType {
-        return when (sak?.toInt() and 0xFF) {
+        return when ((sak?.toInt() ?: 0) and 0xFF) {
             0x20 -> CardType.MIFARE_DESFIRE_EV1
             else -> CardType.MIFARE_DESFIRE
         }

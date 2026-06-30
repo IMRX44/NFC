@@ -79,17 +79,16 @@ class MifareAttackEngine @Inject constructor() {
                     val hexKey = KeyDictionary.keyToHex(key)
 
                     // Try Key A
-                    val authA = tryAuthenticate(mifare, sector, key, MifareClassic.KEY_A)
+                    val authA = tryAuthenticate(mifare, sector, key, 0)
                     emit(AttackProgress(sector, totalSectors, hexKey, "A", authA,
                         if (authA) "✓ Key A FOUND for sector $sector: $hexKey"
                         else "✗ Sector $sector Key A: $hexKey"))
                     if (authA) {
-                        // Re-authenticate for Key B (connection may have dropped)
                         mifare.authenticateSectorWithKeyA(sector, key)
                     }
 
                     // Try Key B
-                    val authB = tryAuthenticate(mifare, sector, key, MifareClassic.KEY_B)
+                    val authB = tryAuthenticate(mifare, sector, key, 1)
                     emit(AttackProgress(sector, totalSectors, hexKey, "B", authB,
                         if (authB) "✓ Key B FOUND for sector $sector: $hexKey"
                         else "✗ Sector $sector Key B: $hexKey"))
@@ -294,7 +293,7 @@ class MifareAttackEngine @Inject constructor() {
 
     private fun tryAuthenticate(mifare: MifareClassic, sector: Int, key: ByteArray, keyType: Int): Boolean {
         return try {
-            if (keyType == MifareClassic.KEY_A) {
+            if (keyType == 0) {
                 mifare.authenticateSectorWithKeyA(sector, key)
             } else {
                 mifare.authenticateSectorWithKeyB(sector, key)

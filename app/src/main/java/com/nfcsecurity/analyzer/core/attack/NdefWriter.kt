@@ -1,12 +1,12 @@
 package com.nfcsecurity.analyzer.core.attack
 
+import android.net.Uri
 import android.nfc.NdefMessage
 import android.nfc.NdefRecord
 import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.nfc.tech.MifareUltralight
-import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,18 +21,30 @@ sealed class NdefWriteResult {
 class NdefWriter @Inject constructor() {
 
     fun writeUrl(tag: Tag, url: String): NdefWriteResult {
-        val record = NdefRecord.createUri(URI.create(url))
+        val record = NdefRecord.createUri(Uri.parse(url))
         return writeMessage(tag, NdefMessage(arrayOf(record)))
     }
 
     fun writeText(tag: Tag, text: String, locale: String = "en"): NdefWriteResult {
-        val record = NdefRecord.createTextRecord(locale, text)
+        val langBytes = locale.toByteArray(Charsets.US_ASCII)
+        val textBytes = text.toByteArray(Charsets.UTF_8)
+        val payload = ByteArray(1 + langBytes.size + textBytes.size)
+        payload[0] = langBytes.size.toByte()
+        langBytes.copyInto(payload, 1)
+        textBytes.copyInto(payload, 1 + langBytes.size)
+        val record = NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_TEXT, ByteArray(0), payload)
         return writeMessage(tag, NdefMessage(arrayOf(record)))
     }
 
     fun writeSmartPoster(tag: Tag, url: String, title: String): NdefWriteResult {
-        val urlRecord = NdefRecord.createUri(URI.create(url))
-        val titleRecord = NdefRecord.createTextRecord("en", title)
+        val urlRecord = NdefRecord.createUri(Uri.parse(url))
+        val langBytes = "en".toByteArray(Charsets.US_ASCII)
+        val titleBytes = title.toByteArray(Charsets.UTF_8)
+        val titlePayload = ByteArray(1 + langBytes.size + titleBytes.size)
+        titlePayload[0] = langBytes.size.toByte()
+        langBytes.copyInto(titlePayload, 1)
+        titleBytes.copyInto(titlePayload, 1 + langBytes.size)
+        val titleRecord = NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_TEXT, ByteArray(0), titlePayload)
         val spPayload = NdefMessage(arrayOf(urlRecord, titleRecord)).toByteArray()
         val spRecord = NdefRecord(
             NdefRecord.TNF_WELL_KNOWN,
@@ -49,7 +61,7 @@ class NdefWriter @Inject constructor() {
     }
 
     fun writeAndLock(tag: Tag, url: String): NdefWriteResult {
-        val record = NdefRecord.createUri(URI.create(url))
+        val record = NdefRecord.createUri(Uri.parse(url))
         val msg = NdefMessage(arrayOf(record))
         val result = writeMessage(tag, msg)
         if (result is NdefWriteResult.Success) {
@@ -59,8 +71,11 @@ class NdefWriter @Inject constructor() {
     }
 
     fun eraseNdef(tag: Tag): NdefWriteResult {
-        // Write empty NDEF message (single empty text record)
-        val emptyRecord = NdefRecord.createTextRecord("en", "")
+        val langBytes = "en".toByteArray(Charsets.US_ASCII)
+        val payload = ByteArray(1 + langBytes.size)
+        payload[0] = langBytes.size.toByte()
+        langBytes.copyInto(payload, 1)
+        val emptyRecord = NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_TEXT, ByteArray(0), payload)
         return writeMessage(tag, NdefMessage(arrayOf(emptyRecord)))
     }
 
@@ -96,10 +111,7 @@ class NdefWriter @Inject constructor() {
     }
 
     private fun writeMessage(tag: Tag, message: NdefMessage): NdefWriteResult {
-        val ndef = Ndef.get(tag) ?: run {
-            // Try formatting first
-            return formatAndWrite(tag, message)
-        }
+        val ndef = Ndef.get(tag) ?: return formatAndWrite(tag, message)
         return try {
             ndef.connect()
             if (!ndef.isWritable) return NdefWriteResult.ReadOnly
