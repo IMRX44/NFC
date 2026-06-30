@@ -55,6 +55,10 @@ data class DumpResult(
 @Singleton
 class MifareAttackEngine @Inject constructor() {
 
+    /**
+     * Dictionary attack: key-first ordering (test each key against all unsolved sectors).
+     * One connection for entire attack. Skips already-solved sectors.
+     */
     fun attackWithDictionary(
         tag: Tag,
         customKeys: List<ByteArray> = emptyList(),
@@ -71,31 +75,44 @@ class MifareAttackEngine @Inject constructor() {
             val totalSectors = mifare.sectorCount
             val keyList = buildKeyList(customKeys, includeDefaults)
 
+            val solvedA = BooleanArray(totalSectors)
+            val solvedB = BooleanArray(totalSectors)
+            var totalFound = 0
+
             emit(AttackProgress(0, totalSectors, "", "", false,
-                "Starting dictionary attack: ${keyList.size} keys × $totalSectors sectors"))
+                "Dictionary attack: ${keyList.size} keys × $totalSectors sectors"))
 
-            for (sector in 0 until totalSectors) {
-                for (key in keyList) {
-                    val hexKey = KeyDictionary.keyToHex(key)
+            for (key in keyList) {
+                val allSolved = (0 until totalSectors).all { solvedA[it] && solvedB[it] }
+                if (allSolved) break
 
-                    // Try Key A
-                    val authA = tryAuthenticate(mifare, sector, key, 0)
-                    emit(AttackProgress(sector, totalSectors, hexKey, "A", authA,
-                        if (authA) "✓ Key A FOUND for sector $sector: $hexKey"
-                        else "✗ Sector $sector Key A: $hexKey"))
-                    if (authA) {
-                        mifare.authenticateSectorWithKeyA(sector, key)
+                val hexKey = KeyDictionary.keyToHex(key)
+
+                for (sector in 0 until totalSectors) {
+                    if (!solvedA[sector]) {
+                        val ok = tryAuthenticate(mifare, sector, key, 0)
+                        if (ok) {
+                            solvedA[sector] = true
+                            totalFound++
+                            emit(AttackProgress(sector, totalSectors, hexKey, "A", true,
+                                "✓ Key A s$sector: $hexKey"))
+                        }
                     }
-
-                    // Try Key B
-                    val authB = tryAuthenticate(mifare, sector, key, 1)
-                    emit(AttackProgress(sector, totalSectors, hexKey, "B", authB,
-                        if (authB) "✓ Key B FOUND for sector $sector: $hexKey"
-                        else "✗ Sector $sector Key B: $hexKey"))
+                    if (!solvedB[sector]) {
+                        val ok = tryAuthenticate(mifare, sector, key, 1)
+                        if (ok) {
+                            solvedB[sector] = true
+                            totalFound++
+                            emit(AttackProgress(sector, totalSectors, hexKey, "B", true,
+                                "✓ Key B s$sector: $hexKey"))
+                        }
+                    }
                 }
             }
 
-            emit(AttackProgress(totalSectors, totalSectors, "", "", false, "Attack complete"))
+            val solvedCount = (0 until totalSectors).count { solvedA[it] || solvedB[it] }
+            emit(AttackProgress(totalSectors, totalSectors, "", "", false,
+                "Dictionary complete: $totalFound keys found, $solvedCount/$totalSectors sectors cracked"))
 
         } finally {
             try { mifare.close() } catch (_: Exception) {}
@@ -291,7 +308,99 @@ class MifareAttackEngine @Inject constructor() {
         }
     }
 
-    /** Quick single-key probe without connecting (caller must connect). Returns true if auth succeeds. */
+    /**
+     * Fast brute force: ONE connection for entire run.
+     * Tests each key against ALL unsolved sectors (both A+B) before moving on.
+     * Emits only on hit or every batchSize failures to reduce overhead.
+     * This eliminates the ~30ms connect/close cost per attempt.
+     */
+    fun fastBruteForce(
+        tag: Tag,
+        keyFlow: kotlinx.coroutines.flow.Flow<ByteArray>,
+        batchSize: Int = 500
+    ): Flow<AttackProgress> = flow {
+
+        val mifare = MifareClassic.get(tag) ?: run {
+            emit(AttackProgress(0, 0, "", "", false, "Not a MIFARE Classic card"))
+            return@flow
+        }
+
+        try {
+            mifare.connect()
+            val totalSectors = mifare.sectorCount
+
+            // Track which sectors still need cracking
+            val solvedA = BooleanArray(totalSectors)
+            val solvedB = BooleanArray(totalSectors)
+            val foundA = arrayOfNulls<ByteArray>(totalSectors)
+            val foundB = arrayOfNulls<ByteArray>(totalSectors)
+
+            var tested = 0L
+            var totalFound = 0
+
+            emit(AttackProgress(0, totalSectors, "", "", false,
+                "FastBruteForce started — single-connection mode"))
+
+            keyFlow.collect { key ->
+                // Skip iteration if all sectors solved
+                val allSolved = (0 until totalSectors).all { solvedA[it] && solvedB[it] }
+                if (allSolved) return@collect
+
+                val hexKey = KeyDictionary.keyToHex(key)
+                tested++
+
+                for (sector in 0 until totalSectors) {
+                    // Test Key A if not yet found
+                    if (!solvedA[sector]) {
+                        val ok = tryAuthenticate(mifare, sector, key, 0)
+                        if (ok) {
+                            solvedA[sector] = true
+                            foundA[sector] = key.copyOf()
+                            totalFound++
+                            emit(AttackProgress(sector, totalSectors, hexKey, "A", true,
+                                "✓ KEY A s${sector}: $hexKey  [${tested} tested]"))
+                        }
+                    }
+                    // Test Key B if not yet found
+                    if (!solvedB[sector]) {
+                        val ok = tryAuthenticate(mifare, sector, key, 1)
+                        if (ok) {
+                            solvedB[sector] = true
+                            foundB[sector] = key.copyOf()
+                            totalFound++
+                            emit(AttackProgress(sector, totalSectors, hexKey, "B", true,
+                                "✓ KEY B s${sector}: $hexKey  [${tested} tested]"))
+                        }
+                    }
+                }
+
+                // Progress heartbeat every batchSize attempts
+                if (tested % batchSize == 0L) {
+                    val solvedCount = (0 until totalSectors).count { solvedA[it] || solvedB[it] }
+                    emit(AttackProgress(solvedCount, totalSectors, hexKey, "", false,
+                        "Tested: $tested  Found: $totalFound  Sectors cracked: $solvedCount/$totalSectors"))
+                }
+            }
+
+            // Build result summary
+            val summary = buildString {
+                appendLine("FastBruteForce complete: $tested keys tested, $totalFound keys found")
+                for (s in 0 until totalSectors) {
+                    val a = foundA[s]?.let { KeyDictionary.keyToHex(it) } ?: "NOT FOUND"
+                    val b = foundB[s]?.let { KeyDictionary.keyToHex(it) } ?: "NOT FOUND"
+                    appendLine("Sector $s → A: $a  B: $b")
+                }
+            }
+            emit(AttackProgress(totalSectors, totalSectors, "", "", false, summary))
+
+        } catch (e: Exception) {
+            emit(AttackProgress(0, 0, "", "", false, "Error: ${e.message}"))
+        } finally {
+            try { mifare.close() } catch (_: Exception) {}
+        }
+    }
+
+    /** Quick single-key probe (keeps connection open if already connected). */
     fun probeKey(tag: Tag, sector: Int, key: ByteArray, useKeyA: Boolean): Boolean {
         val mifare = MifareClassic.get(tag) ?: return false
         return try {

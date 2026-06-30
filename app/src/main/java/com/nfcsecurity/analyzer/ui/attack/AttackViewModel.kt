@@ -77,28 +77,35 @@ class AttackViewModel @Inject constructor(
     fun runSmartBruteForce(tag: Tag) {
         foundKeys.clear()
         activeJob = viewModelScope.launch(Dispatchers.IO) {
-            var tested = 0
-            var found = 0
             try {
-                SmartKeyGenerator.generateAll(tag.id).collect { keyBytes ->
-                    tested++
-                    if (tested % 200 == 0) {
-                        _attackState.postValue(AttackUiState.Running(
-                            "SmartBrute: $tested tested, $found found", minOf(tested / 500, 99)
-                        ))
-                    }
-                    val hit = mifareEngine.probeKey(tag, 0, keyBytes, true)
-                    if (hit) {
-                        found++
-                        foundKeys[0] = Pair(keyBytes.copyOf(), null)
-                        _attackState.postValue(AttackUiState.Running(
-                            "[HIT] Key A s0: ${KeyDictionary.keyToHex(keyBytes)}", minOf(tested / 500, 99)
-                        ))
+                mifareEngine.fastBruteForce(
+                    tag = tag,
+                    keyFlow = SmartKeyGenerator.generateAll(tag.id),
+                    batchSize = 500
+                ).collect { p ->
+                    if (p.found) {
+                        // Store found key
+                        val cur = foundKeys[p.sector] ?: Pair(null, null)
+                        val keyBytes = KeyDictionary.hexToKey(p.keyTested)
+                        foundKeys[p.sector] = if (p.keyType == "A")
+                            Pair(keyBytes, cur.second)
+                        else
+                            Pair(cur.first, keyBytes)
+                        _attackState.postValue(AttackUiState.Running(p.message, 50))
+                    } else if (p.totalSectors > 0) {
+                        val pct = if (p.totalSectors > 0)
+                            minOf((p.sector * 100) / p.totalSectors, 99) else 0
+                        _attackState.postValue(AttackUiState.Running(p.message, pct))
+                    } else {
+                        // Final summary message
+                        _attackState.postValue(AttackUiState.Success(p.message))
                     }
                 }
-                _attackState.postValue(AttackUiState.Success(
-                    "SmartBruteForce complete: $tested keys tested, $found found\n${buildKeySummary(foundKeys, 16)}"
-                ))
+                if (_attackState.value !is AttackUiState.Success) {
+                    _attackState.postValue(AttackUiState.Success(
+                        "BruteForce complete\n${buildKeySummary(foundKeys, 16)}"
+                    ))
+                }
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) _attackState.postValue(AttackUiState.Idle)
                 else _attackState.postValue(AttackUiState.Error(e.message ?: "BruteForce failed"))

@@ -161,23 +161,29 @@ object SmartKeyGenerator {
         return keys
     }
 
+    /**
+     * Full sequential brute force over all 2^48 combinations.
+     * Iterates b0 from 0x00..0xFF, then b1, etc. — complete coverage with no gaps.
+     * At ~100 NFC auths/sec this is the long-tail fallback after smart patterns.
+     */
     private fun structuredBruteForce(): Sequence<ByteArray> = sequence {
-        // Fix first 3 bytes from a reduced set, vary last 3 fully
-        val topBytes = listOf(
-            byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte()),
-            byteArrayOf(0x00, 0x00, 0x00),
-            byteArrayOf(0xA0.toByte(), 0xA1.toByte(), 0xA2.toByte()),
-            byteArrayOf(0xB0.toByte(), 0xB1.toByte(), 0xB2.toByte()),
-            byteArrayOf(0xD3.toByte(), 0xF7.toByte(), 0xD3.toByte()),
-            byteArrayOf(0x4B.toByte(), 0x0B.toByte(), 0x20.toByte()),
-            byteArrayOf(0xAA.toByte(), 0xBB.toByte(), 0xCC.toByte()),
-        )
-        for (top in topBytes) {
-            for (b3 in 0..0xFF) {
-                for (b4 in 0..0xFF step 4) { // step 4 = 64x speed multiplier per byte
-                    for (b5 in 0..0xFF step 4) {
-                        yield(byteArrayOf(top[0], top[1], top[2],
-                            b3.toByte(), b4.toByte(), b5.toByte()))
+        // Reuse a single array and mutate it — avoids 281T allocations
+        val k = ByteArray(6)
+        for (b0 in 0..0xFF) {
+            k[0] = b0.toByte()
+            for (b1 in 0..0xFF) {
+                k[1] = b1.toByte()
+                for (b2 in 0..0xFF) {
+                    k[2] = b2.toByte()
+                    for (b3 in 0..0xFF) {
+                        k[3] = b3.toByte()
+                        for (b4 in 0..0xFF) {
+                            k[4] = b4.toByte()
+                            for (b5 in 0..0xFF) {
+                                k[5] = b5.toByte()
+                                yield(k.copyOf())
+                            }
+                        }
                     }
                 }
             }
