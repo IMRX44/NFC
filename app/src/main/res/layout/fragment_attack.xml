@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_primary">
+
+    <!-- Top toolbar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="@color/bg_secondary">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ATTACK CONSOLE"
+            android:textColor="@color/neon_red"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"/>
+
+        <TextView
+            android:id="@+id/tv_attack_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IDLE"
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp"
+            android:fontFamily="monospace"/>
+    </LinearLayout>
+
+    <!-- No tag warning -->
+    <LinearLayout
+        android:id="@+id/ll_no_tag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="#1AFF2D55">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_error"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="  Scan a tag first to enable attacks"
+            android:textColor="@color/neon_red"
+            android:textSize="12sp"
+            android:fontFamily="monospace"/>
+    </LinearLayout>
+
+    <!-- Attack modules -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Key Attack Module -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="■ KEY ATTACK" android:textColor="@color/neon_orange"
+                android:textSize="12sp" android:fontFamily="monospace"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <Button android:id="@+id/btn_dict_attack"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:text="Dictionary" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_cyber"/>
+                <Button android:id="@+id/btn_bruteforce"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:text="BruteForce++" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_attack"/>
+            </LinearLayout>
+
+            <!-- Dump Module -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="■ DUMP MODULE" android:textColor="@color/neon_orange"
+                android:textSize="12sp" android:fontFamily="monospace"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <Button android:id="@+id/btn_dump_card"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:text="Full Dump" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_cyber"/>
+                <Button android:id="@+id/btn_dump_ultralight"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:text="UL Dump" android:textColor="@color/neon_cyan"
+                    android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/bg_card"/>
+            </LinearLayout>
+
+            <!-- NDEF Module -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="■ NDEF MODULE" android:textColor="@color/neon_orange"
+                android:textSize="12sp" android:fontFamily="monospace"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="8dp">
+                <Button android:id="@+id/btn_write_url"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:text="Write URL" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_cyber"/>
+                <Button android:id="@+id/btn_write_text"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:text="Write Text" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_cyber"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <Button android:id="@+id/btn_ndef_fuzz"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:text="NDEF Fuzz" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_attack"/>
+                <Button android:id="@+id/btn_erase_ndef"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:text="Erase NDEF" android:textColor="@color/neon_red"
+                    android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/bg_card"/>
+            </LinearLayout>
+
+            <!-- Write Module -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="■ WRITE MODULE" android:textColor="@color/neon_orange"
+                android:textSize="12sp" android:fontFamily="monospace"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginBottom="8dp">
+                <EditText android:id="@+id/et_block_num"
+                    android:layout_width="match_parent" android:layout_height="42dp"
+                    android:hint="Block number (0-63)" android:inputType="number"
+                    android:textColor="@color/text_primary" android:textColorHint="@color/text_hint"
+                    android:textSize="12sp" android:fontFamily="monospace"
+                    android:background="@drawable/input_bg" android:paddingHorizontal="12dp"
+                    android:layout_marginBottom="8dp"/>
+                <EditText android:id="@+id/et_block_data"
+                    android:layout_width="match_parent" android:layout_height="42dp"
+                    android:hint="Hex data (16 bytes = 32 hex chars)" android:inputType="textNoSuggestions"
+                    android:textColor="@color/text_primary" android:textColorHint="@color/text_hint"
+                    android:textSize="12sp" android:fontFamily="monospace"
+                    android:background="@drawable/input_bg" android:paddingHorizontal="12dp"/>
+            </LinearLayout>
+            <Button android:id="@+id/btn_write_block"
+                android:layout_width="match_parent" android:layout_height="42dp"
+                android:text="WRITE BLOCK" android:textColor="@color/bg_primary"
+                android:textSize="11sp" android:fontFamily="monospace"
+                android:background="@drawable/btn_attack" android:layout_marginBottom="16dp"/>
+
+            <!-- Access Bits Module -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="■ ACCESS CONTROL" android:textColor="@color/neon_orange"
+                android:textSize="12sp" android:fontFamily="monospace"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <Button android:id="@+id/btn_flip_access"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:text="Flip Access Bits" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_attack"/>
+                <Button android:id="@+id/btn_trailer_wipe"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:text="Trailer Wipe" android:textColor="@color/neon_red"
+                    android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/bg_card"/>
+            </LinearLayout>
+
+            <!-- Value Module -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="■ VALUE MODULE" android:textColor="@color/neon_orange"
+                android:textSize="12sp" android:fontFamily="monospace"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <Button android:id="@+id/btn_value_inc"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:text="Increment" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_cyber"/>
+                <Button android:id="@+id/btn_value_dec"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:text="Decrement" android:textColor="@color/neon_cyan"
+                    android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/bg_card"/>
+                <Button android:id="@+id/btn_value_overflow"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:text="Overflow" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_attack"/>
+            </LinearLayout>
+
+            <!-- ISO/APDU Module -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="■ APDU MODULE" android:textColor="@color/neon_orange"
+                android:textSize="12sp" android:fontFamily="monospace"
+                android:layout_marginBottom="8dp"/>
+
+            <EditText android:id="@+id/et_apdu"
+                android:layout_width="match_parent" android:layout_height="42dp"
+                android:hint="APDU hex (e.g. 00A40400 or 9060000000)"
+                android:textColor="@color/text_primary" android:textColorHint="@color/text_hint"
+                android:textSize="11sp" android:fontFamily="monospace"
+                android:background="@drawable/input_bg" android:paddingHorizontal="12dp"
+                android:inputType="textNoSuggestions" android:layout_marginBottom="8dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="16dp">
+                <Button android:id="@+id/btn_send_apdu"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:text="Send APDU" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_cyber"/>
+                <Button android:id="@+id/btn_desfire_enum"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:text="DESFire Enum" android:textColor="@color/neon_cyan"
+                    android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/bg_card"/>
+            </LinearLayout>
+
+            <!-- Combined Attack Chain -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="■ CHAIN ATTACK" android:textColor="@color/neon_red"
+                android:textSize="12sp" android:fontFamily="monospace"
+                android:layout_marginBottom="8dp"/>
+
+            <Button android:id="@+id/btn_full_chain"
+                android:layout_width="match_parent" android:layout_height="52dp"
+                android:text="⚡ FULL CHAIN: KEY→DUMP→CLONE"
+                android:textColor="@color/bg_primary" android:textSize="13sp"
+                android:fontFamily="monospace" android:textStyle="bold"
+                android:background="@drawable/btn_attack" android:layout_marginBottom="8dp"/>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="8dp">
+                <Button android:id="@+id/btn_relay_inject"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:text="Relay Inject" android:textColor="@color/bg_primary"
+                    android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_attack"/>
+                <Button android:id="@+id/btn_clone_uid"
+                    android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
+                    android:text="Clone UID" android:textColor="@color/neon_red"
+                    android:textSize="11sp" android:fontFamily="monospace" android:backgroundTint="@color/bg_card"/>
+            </LinearLayout>
+
+            <Button android:id="@+id/btn_lock_tag"
+                android:layout_width="match_parent" android:layout_height="42dp"
+                android:text="🔒 LOCK TAG (PERMANENT)"
+                android:textColor="@color/neon_red" android:textSize="12sp"
+                android:fontFamily="monospace" android:backgroundTint="@color/bg_card"
+                android:layout_marginBottom="8dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Progress bar -->
+    <LinearLayout
+        android:id="@+id/ll_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@color/bg_secondary"
+        android:visibility="gone">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginBottom="4dp">
+            <TextView android:id="@+id/tv_progress_label"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="Working..." android:textColor="@color/neon_green"
+                android:textSize="12sp" android:fontFamily="monospace"/>
+            <TextView android:id="@+id/tv_progress_pct"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0%" android:textColor="@color/text_secondary"
+                android:textSize="12sp" android:fontFamily="monospace"/>
+        </LinearLayout>
+
+        <ProgressBar android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent" android:layout_height="6dp"
+            android:progressTint="@color/neon_cyan" android:progressBackgroundTint="@color/bg_elevated"
+            android:max="100"/>
+
+        <Button android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content" android:layout_height="36dp"
+            android:layout_gravity="end" android:layout_marginTop="8dp"
+            android:text="CANCEL" android:textColor="@color/neon_red"
+            android:textSize="11sp" android:fontFamily="monospace"
+            android:backgroundTint="@color/bg_elevated"/>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp" android:height="120dp"
+    android:viewportWidth="120" android:viewportHeight="120">
+    <!-- Outer ring -->
+    <path android:strokeColor="#3300F5FF" android:strokeWidth="2"
+        android:fillColor="#00000000"
+        android:pathData="M60,10 A50,50 0 1,1 59.9,10"/>
+    <!-- Mid ring -->
+    <path android:strokeColor="#6600F5FF" android:strokeWidth="2"
+        android:fillColor="#00000000"
+        android:pathData="M60,25 A35,35 0 1,1 59.9,25"/>
+    <!-- Inner ring -->
+    <path android:strokeColor="#9900F5FF" android:strokeWidth="2"
+        android:fillColor="#00000000"
+        android:pathData="M60,40 A20,20 0 1,1 59.9,40"/>
+    <!-- NFC center dot -->
+    <path android:fillColor="#00F5FF"
+        android:pathData="M60,52 A8,8 0 1,0 60.01,52 Z"/>
+    <!-- NFC signal lines -->
+    <path android:strokeColor="#00F5FF" android:strokeWidth="3"
+        android:fillColor="#00000000"
+        android:pathData="M48,48 Q40,60 48,72"/>
+    <path android:strokeColor="#00F5FF" android:strokeWidth="3"
+        android:fillColor="#00000000"
+        android:pathData="M72,48 Q80,60 72,72"/>
+</vector>

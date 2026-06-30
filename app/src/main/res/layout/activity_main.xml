@@ -1,212 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_dark">
+    android:background="@color/bg_primary">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:elevation="0dp"
-        app:backgroundColor="@color/surface_dark">
+        android:background="@drawable/nav_bg"
+        app:itemIconTint="@color/nav_item_color"
+        app:itemTextColor="@color/nav_item_color"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="NFC Security Analyzer"
-            app:titleTextColor="@color/text_primary"
-            app:subtitleTextColor="@color/text_secondary" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <!-- NFC Status -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/surface_dark"
-                app:cardCornerRadius="12dp"
-                app:strokeColor="@color/divider"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_nfc"
-                        app:tint="@color/accent_cyan" />
-
-                    <TextView
-                        android:id="@+id/tv_nfc_status"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="12dp"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        tools:text="NFC Ready — Awaiting Card" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- IDLE STATE -->
-            <LinearLayout
-                android:id="@+id/group_idle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <com.airbnb.lottie.LottieAnimationView
-                    android:id="@+id/anim_scan"
-                    android:layout_width="220dp"
-                    android:layout_height="220dp"
-                    android:layout_gravity="center"
-                    app:lottie_rawRes="@raw/nfc_scan"
-                    app:lottie_autoPlay="true"
-                    app:lottie_loop="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/hold_card_near"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="8dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tap_to_scan_desc"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:paddingHorizontal="32dp" />
-
-            </LinearLayout>
-
-            <!-- SCANNING STATE -->
-            <LinearLayout
-                android:id="@+id/group_scanning"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:visibility="gone">
-
-                <com.airbnb.lottie.LottieAnimationView
-                    android:id="@+id/anim_processing"
-                    android:layout_width="160dp"
-                    android:layout_height="160dp"
-                    android:layout_gravity="center"
-                    app:lottie_rawRes="@raw/processing"
-                    app:lottie_autoPlay="true"
-                    app:lottie_loop="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/analyzing_card"
-                    android:textColor="@color/accent_cyan"
-                    android:textSize="16sp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="8dp" />
-
-            </LinearLayout>
-
-            <!-- ERROR STATE -->
-            <LinearLayout
-                android:id="@+id/group_error"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:visibility="gone">
-
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@drawable/ic_error"
-                    app:tint="@color/risk_high"
-                    android:layout_gravity="center" />
-
-                <TextView
-                    android:id="@+id/tv_error_message"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/risk_high"
-                    android:textSize="14sp"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:layout_marginTop="8dp"
-                    tools:text="Error reading card" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_retry"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/try_again"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="16dp"
-                    app:backgroundTint="@color/surface_elevated"
-                    android:textColor="@color/text_primary"
-                    style="@style/Widget.Material3.Button.OutlinedButton" />
-
-            </LinearLayout>
-
-            <!-- Last Scan Card (placeholder) -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/card_last_scan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:visibility="gone"
-                app:cardBackgroundColor="@color/surface_dark"
-                app:cardCornerRadius="12dp"
-                app:strokeColor="@color/divider"
-                app:strokeWidth="1dp">
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- History Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_view_history"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/view_scan_history"
-                app:backgroundTint="@color/surface_elevated"
-                android:textColor="@color/text_primary"
-                app:icon="@drawable/ic_history"
-                app:iconTint="@color/accent_cyan"
-                style="@style/Widget.Material3.Button.OutlinedButton" />
-
-        </LinearLayout>
-    </ScrollView>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

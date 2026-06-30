@@ -1,27 +1,41 @@
 package com.nfcsecurity.analyzer.ui
 
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.IntentFilter
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nfcsecurity.analyzer.R
-import com.nfcsecurity.analyzer.core.report.FullReport
 import com.nfcsecurity.analyzer.databinding.ActivityMainBinding
-import com.nfcsecurity.analyzer.ui.details.CardDetailsActivity
+import com.nfcsecurity.analyzer.ui.attack.AttackFragment
+import com.nfcsecurity.analyzer.ui.console.ConsoleFragment
+import com.nfcsecurity.analyzer.ui.home.HomeFragment
+import com.nfcsecurity.analyzer.ui.scan.ScanFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModels()
+    lateinit var binding: ActivityMainBinding
+    val viewModel: MainViewModel by viewModels()
     private var nfcAdapter: NfcAdapter? = null
     private lateinit var pendingIntent: PendingIntent
+
+    private val homeFragment = HomeFragment()
+    private val scanFragment = ScanFragment()
+    private val attackFragment = AttackFragment()
+    private val consoleFragment = ConsoleFragment()
+    private val historyFragment = com.nfcsecurity.analyzer.ui.HistoryFragment()
+
+    private var activeFragment: Fragment = homeFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,9 +44,9 @@ class MainActivity : AppCompatActivity() {
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         setupPendingIntent()
-        setupObservers()
-        setupClickListeners()
-        checkNfcStatus()
+        setupFragments()
+        setupBottomNav()
+        startRadarAnimation()
     }
 
     private fun setupPendingIntent() {
@@ -43,87 +57,44 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun setupObservers() {
-        viewModel.scanState.observe(this) { state ->
-            when (state) {
-                is ScanState.Idle -> showIdleState()
-                is ScanState.Scanning -> showScanningState()
-                is ScanState.Success -> showSuccessState(state.report)
-                is ScanState.Error -> showErrorState(state.message)
+    private fun setupFragments() {
+        supportFragmentManager.beginTransaction().apply {
+            add(R.id.fragment_container, homeFragment, "home")
+            add(R.id.fragment_container, scanFragment, "scan").hide(scanFragment)
+            add(R.id.fragment_container, attackFragment, "attack").hide(attackFragment)
+            add(R.id.fragment_container, consoleFragment, "console").hide(consoleFragment)
+            add(R.id.fragment_container, historyFragment, "history").hide(historyFragment)
+        }.commit()
+    }
+
+    private fun setupBottomNav() {
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            val target = when (item.itemId) {
+                R.id.nav_home -> homeFragment
+                R.id.nav_scan -> scanFragment
+                R.id.nav_attack -> attackFragment
+                R.id.nav_console -> consoleFragment
+                R.id.nav_history -> historyFragment
+                else -> return@setOnItemSelectedListener false
             }
+            switchFragment(target)
+            true
         }
     }
 
-    private fun setupClickListeners() {
-        binding.btnViewHistory.setOnClickListener {
-            startActivity(Intent(this, HistoryActivity::class.java))
-        }
-        binding.cardLastScan.setOnClickListener {
-            // Navigate to details if there's a last scan
-        }
-        binding.btnRetry.setOnClickListener {
-            viewModel.resetState()
-        }
+    private fun switchFragment(target: Fragment) {
+        if (target == activeFragment) return
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(R.anim.fade_in, R.anim.fade_in)
+            .hide(activeFragment)
+            .show(target)
+            .commit()
+        activeFragment = target
     }
 
-    private fun checkNfcStatus() {
-        when {
-            nfcAdapter == null -> {
-                binding.tvNfcStatus.text = getString(R.string.nfc_not_supported)
-                binding.tvNfcStatus.setTextColor(getColor(R.color.risk_high))
-            }
-            !nfcAdapter!!.isEnabled -> {
-                binding.tvNfcStatus.text = getString(R.string.nfc_disabled)
-                binding.tvNfcStatus.setTextColor(getColor(R.color.risk_medium))
-            }
-            else -> {
-                binding.tvNfcStatus.text = getString(R.string.nfc_ready)
-                binding.tvNfcStatus.setTextColor(getColor(R.color.risk_low))
-            }
-        }
-    }
-
-    private fun showIdleState() {
-        binding.groupScanning.visibility = View.GONE
-        binding.groupError.visibility = View.GONE
-        binding.groupIdle.visibility = View.VISIBLE
-        binding.animScan.playAnimation()
-    }
-
-    private fun showScanningState() {
-        binding.groupIdle.visibility = View.GONE
-        binding.groupError.visibility = View.GONE
-        binding.groupScanning.visibility = View.VISIBLE
-        binding.animProcessing.playAnimation()
-    }
-
-    private fun showSuccessState(report: FullReport) {
-        binding.groupScanning.visibility = View.GONE
-        binding.groupError.visibility = View.GONE
-        binding.groupIdle.visibility = View.VISIBLE
-
-        // Brief success indicator then navigate
-        val intent = Intent(this, CardDetailsActivity::class.java).apply {
-            putExtra(CardDetailsActivity.EXTRA_UID, report.cardInfo.uid)
-            putExtra(CardDetailsActivity.EXTRA_CARD_TYPE, report.cardInfo.cardType.displayName)
-            putExtra(CardDetailsActivity.EXTRA_RISK_LEVEL, report.securityReport.overallRiskLevel.label)
-            putExtra(CardDetailsActivity.EXTRA_SECURITY_GRADE, report.securityReport.securityGrade.label)
-            putExtra(CardDetailsActivity.EXTRA_ENCRYPTION, report.securityReport.encryptionType.displayName)
-            putExtra(CardDetailsActivity.EXTRA_MANUFACTURER, report.cardInfo.manufacturer)
-            putExtra(CardDetailsActivity.EXTRA_MEMORY, report.cardInfo.memoryCapacity)
-            putExtra(CardDetailsActivity.EXTRA_ATQA, report.cardInfo.atqa ?: "N/A")
-            putExtra(CardDetailsActivity.EXTRA_SAK, report.cardInfo.sak ?: "N/A")
-            putExtra(CardDetailsActivity.EXTRA_REPORT_JSON, com.google.gson.Gson().toJson(report))
-        }
-        startActivity(intent)
-        viewModel.resetState()
-    }
-
-    private fun showErrorState(message: String) {
-        binding.groupIdle.visibility = View.GONE
-        binding.groupScanning.visibility = View.GONE
-        binding.groupError.visibility = View.VISIBLE
-        binding.tvErrorMessage.text = message
+    private fun startRadarAnimation() {
+        // Radar pulse on home fragment NFC icon
+        // The HomeFragment manages its own animation
     }
 
     override fun onResume() {
@@ -143,7 +114,11 @@ class MainActivity : AppCompatActivity() {
             NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action
         ) {
             val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
-            tag?.let { viewModel.processNfcTag(it) }
+            tag?.let {
+                viewModel.processNfcTag(it)
+                // Switch to scan tab to show results
+                binding.bottomNav.selectedItemId = R.id.nav_scan
+            }
         }
     }
 }

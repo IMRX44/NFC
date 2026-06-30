@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">NFC Security Analyzer</string>
+    <string name="app_name">NFC Phantom</string>
     <string name="nfc_not_supported">NFC not supported on this device</string>
     <string name="nfc_disabled">NFC is disabled — enable it in Settings</string>
     <string name="nfc_ready">NFC Ready — Hold card near the back of your device</string>

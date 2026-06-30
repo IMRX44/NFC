@@ -1,38 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark theme base palette -->
-    <color name="background_dark">#0D1117</color>
-    <color name="surface_dark">#161B22</color>
-    <color name="surface_elevated">#21262D</color>
-    <color name="divider">#30363D</color>
+    <!-- Cyberpunk Dark Base -->
+    <color name="bg_primary">#080C14</color>
+    <color name="bg_secondary">#0D1220</color>
+    <color name="bg_card">#111827</color>
+    <color name="bg_elevated">#1A2235</color>
+    <color name="bg_surface">#1E2A3D</color>
+    <color name="divider">#1E2D45</color>
+
+    <!-- Neon Accents -->
+    <color name="neon_cyan">#00F5FF</color>
+    <color name="neon_green">#00FF88</color>
+    <color name="neon_red">#FF2D55</color>
+    <color name="neon_orange">#FF6B00</color>
+    <color name="neon_purple">#BF5AF2</color>
+    <color name="neon_yellow">#FFD60A</color>
+
+    <!-- Semi-transparent neons -->
+    <color name="neon_cyan_20">#3300F5FF</color>
+    <color name="neon_green_20">#3300FF88</color>
+    <color name="neon_red_20">#33FF2D55</color>
 
     <!-- Text -->
-    <color name="text_primary">#E6EDF3</color>
-    <color name="text_secondary">#8B949E</color>
-    <color name="text_hint">#484F58</color>
-
-    <!-- Accent -->
-    <color name="accent_cyan">#58A6FF</color>
-    <color name="accent_purple">#BC8CFF</color>
-    <color name="accent_green">#3FB950</color>
+    <color name="text_primary">#E8F0FE</color>
+    <color name="text_secondary">#8899BB</color>
+    <color name="text_hint">#445577</color>
+    <color name="text_terminal">#00FF88</color>
 
     <!-- Risk levels -->
-    <color name="risk_low">#3FB950</color>
-    <color name="risk_medium">#D29922</color>
-    <color name="risk_high">#F85149</color>
-    <color name="risk_critical">#DA3633</color>
+    <color name="risk_critical">#FF2D55</color>
+    <color name="risk_high">#FF6B00</color>
+    <color name="risk_medium">#FFD60A</color>
+    <color name="risk_low">#00FF88</color>
 
-    <!-- Light theme variants -->
-    <color name="background_light">#F6F8FA</color>
-    <color name="surface_light">#FFFFFF</color>
-    <color name="surface_elevated_light">#F0F0F0</color>
-
-    <!-- Material -->
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
+    <!-- Aliases kept for legacy code -->
+    <color name="accent_cyan">#00F5FF</color>
+    <color name="accent_purple">#BF5AF2</color>
+    <color name="background_dark">#080C14</color>
+    <color name="surface_dark">#111827</color>
+    <color name="surface_elevated">#1A2235</color>
+    <color name="text_hint_alias">#445577</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
 </resources>

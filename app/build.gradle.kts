@@ -54,4 +54,6 @@ dependencies {
     kapt(libs.room.compiler)
     implementation(libs.viewpager2)
     implementation(libs.lottie)
+    implementation(libs.cardview)
+    implementation(libs.recyclerview)
 }

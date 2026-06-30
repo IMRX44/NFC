@@ -2,12 +2,12 @@ package com.nfcsecurity.analyzer.ui.details
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.nfcsecurity.analyzer.R
 import com.nfcsecurity.analyzer.core.report.FullReport
 import com.nfcsecurity.analyzer.databinding.ActivityCardDetailsBinding
+import com.nfcsecurity.analyzer.ui.attack.AttackActivity
 import com.nfcsecurity.analyzer.ui.report.ReportActivity
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,137 +28,66 @@ class CardDetailsActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityCardDetailsBinding
-    private var fullReport: FullReport? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCardDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "Card Analysis"
-
-        loadData()
-        setupClickListeners()
-    }
-
-    private fun loadData() {
-        val reportJson = intent.getStringExtra(EXTRA_REPORT_JSON)
-        if (reportJson != null) {
-            fullReport = try { Gson().fromJson(reportJson, FullReport::class.java) } catch (_: Exception) { null }
-        }
-
+        val uid = intent.getStringExtra(EXTRA_UID) ?: "--"
         val cardType = intent.getStringExtra(EXTRA_CARD_TYPE) ?: "Unknown"
-        val uid = intent.getStringExtra(EXTRA_UID) ?: "N/A"
-        val riskLevel = intent.getStringExtra(EXTRA_RISK_LEVEL) ?: "Unknown"
-        val grade = intent.getStringExtra(EXTRA_SECURITY_GRADE) ?: "Unknown"
-        val encryption = intent.getStringExtra(EXTRA_ENCRYPTION) ?: "Unknown"
-        val manufacturer = intent.getStringExtra(EXTRA_MANUFACTURER) ?: "Unknown"
-        val memory = intent.getStringExtra(EXTRA_MEMORY) ?: "Unknown"
-        val atqa = intent.getStringExtra(EXTRA_ATQA) ?: "N/A"
-        val sak = intent.getStringExtra(EXTRA_SAK) ?: "N/A"
+        val riskLevel = intent.getStringExtra(EXTRA_RISK_LEVEL) ?: "--"
+        val grade = intent.getStringExtra(EXTRA_SECURITY_GRADE) ?: "--"
+        val encryption = intent.getStringExtra(EXTRA_ENCRYPTION) ?: "--"
+        val manufacturer = intent.getStringExtra(EXTRA_MANUFACTURER) ?: "--"
+        val memory = intent.getIntExtra(EXTRA_MEMORY, 0)
+        val atqa = intent.getStringExtra(EXTRA_ATQA) ?: "--"
+        val sak = intent.getStringExtra(EXTRA_SAK) ?: "--"
+        val reportJson = intent.getStringExtra(EXTRA_REPORT_JSON)
 
-        // Card Info
-        binding.tvCardType.text = cardType
-        binding.tvUid.text = uid
-        binding.tvManufacturer.text = manufacturer
-        binding.tvMemory.text = memory
-        binding.tvAtqa.text = atqa
-        binding.tvSak.text = sak
+        binding.tvCardTypeDetail.text = cardType
+        binding.tvUidDetail.text = uid
+        binding.tvManufacturerDetail.text = manufacturer
+        binding.tvEncryptionDetail.text = encryption
+        binding.tvAtqaDetail.text = atqa
+        binding.tvSakDetail.text = sak
+        binding.tvMemoryDetail.text = "$memory bytes"
+        binding.tvGradeBadge.text = grade
+        binding.tvRiskLevel.text = riskLevel
 
-        // Risk Badge
-        binding.tvRiskBadge.text = riskLevel.uppercase()
         val riskColor = when (riskLevel.uppercase()) {
-            "CRITICAL", "HIGH" -> getColor(R.color.risk_high)
-            "MEDIUM" -> getColor(R.color.risk_medium)
-            else -> getColor(R.color.risk_low)
+            "CRITICAL" -> getColor(R.color.neon_red)
+            "HIGH" -> getColor(R.color.neon_orange)
+            "MEDIUM" -> getColor(R.color.neon_yellow)
+            else -> getColor(R.color.neon_green)
         }
-        binding.tvRiskBadge.setTextColor(riskColor)
-        binding.riskIndicator.setBackgroundColor(riskColor)
+        binding.tvRiskLevel.setTextColor(riskColor)
 
-        // Security section
-        binding.tvSecurityGrade.text = grade
-        binding.tvEncryption.text = encryption
+        val gradeColor = when (grade) {
+            "A+", "A" -> getColor(R.color.neon_green)
+            "B" -> getColor(R.color.neon_yellow)
+            "C" -> getColor(R.color.neon_orange)
+            else -> getColor(R.color.neon_red)
+        }
+        binding.tvGradeBadge.setTextColor(gradeColor)
 
-        // Vulnerabilities
-        fullReport?.securityReport?.vulnerabilities?.let { vulns ->
-            if (vulns.isEmpty()) {
-                binding.tvNoVulnerabilities.visibility = View.VISIBLE
-                binding.containerVulnerabilities.visibility = View.GONE
-            } else {
-                binding.tvNoVulnerabilities.visibility = View.GONE
-                binding.containerVulnerabilities.visibility = View.VISIBLE
-                val sb = StringBuilder()
-                vulns.forEach { v ->
-                    sb.appendLine("▸ ${v.title}  [${v.severity.label} | CVSS ${v.cvssScore}]")
-                    sb.appendLine("  ${v.description}")
-                    sb.appendLine()
-                }
-                binding.tvVulnerabilities.text = sb.toString().trimEnd()
+        binding.btnBack.setOnClickListener { finish() }
+
+        binding.btnAttackFromDetails.setOnClickListener {
+            val intent = Intent(this, AttackActivity::class.java).apply {
+                putExtra(AttackActivity.EXTRA_UID, uid)
+                putExtra(AttackActivity.EXTRA_CARD_TYPE, cardType)
             }
+            startActivity(intent)
         }
 
-        // Risks
-        fullReport?.securityReport?.risks?.let { risks ->
-            val sb = StringBuilder()
-            risks.forEach { r ->
-                val indicator = when (r.level.label.uppercase()) {
-                    "CRITICAL", "HIGH" -> "🔴"
-                    "MEDIUM" -> "🟡"
-                    else -> "🟢"
-                }
-                sb.appendLine("$indicator ${r.category.displayName.padEnd(30)} ${r.level.label.uppercase()}")
-            }
-            binding.tvRiskMatrix.text = sb.toString().trimEnd()
-        }
-
-        // Recommendations
-        fullReport?.securityReport?.recommendations?.let { recs ->
-            val sb = StringBuilder()
-            recs.forEachIndexed { i, rec ->
-                sb.appendLine("${i + 1}. $rec")
-                sb.appendLine()
-            }
-            binding.tvRecommendations.text = sb.toString().trimEnd()
-        }
-
-        // NDEF
-        fullReport?.cardInfo?.ndefRecords?.let { records ->
-            if (records.isEmpty()) {
-                binding.tvNdef.text = getString(R.string.no_ndef_records)
-            } else {
-                val sb = StringBuilder()
-                records.forEachIndexed { i, rec ->
-                    sb.appendLine("[${i + 1}] ${rec.type.name}: ${rec.payload.take(60)}${if (rec.payload.length > 60) "…" else ""}")
-                    if (rec.isSuspicious) sb.appendLine("    ⚠ ${rec.suspiciousReason}")
-                }
-                binding.tvNdef.text = sb.toString().trimEnd()
-            }
-        }
-    }
-
-    private fun setupClickListeners() {
-        binding.btnExportJson.setOnClickListener {
-            fullReport?.let { report ->
+        binding.btnExportFromDetails.setOnClickListener {
+            if (reportJson != null) {
                 val intent = Intent(this, ReportActivity::class.java).apply {
-                    putExtra(ReportActivity.EXTRA_REPORT_JSON, Gson().toJson(report))
+                    putExtra("report_json", reportJson)
                 }
                 startActivity(intent)
             }
         }
-        binding.btnActiveTesting.setOnClickListener {
-            val cardType = intent.getStringExtra(EXTRA_CARD_TYPE) ?: "Unknown"
-            val uid = intent.getStringExtra(EXTRA_UID) ?: ""
-            startActivity(Intent(this, com.nfcsecurity.analyzer.ui.attack.AttackActivity::class.java).apply {
-                putExtra(com.nfcsecurity.analyzer.ui.attack.AttackActivity.EXTRA_CARD_TYPE, cardType)
-                putExtra(com.nfcsecurity.analyzer.ui.attack.AttackActivity.EXTRA_UID, uid)
-            })
-        }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressedDispatcher.onBackPressed()
-        return true
     }
 }

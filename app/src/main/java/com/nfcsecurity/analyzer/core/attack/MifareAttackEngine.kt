@@ -291,6 +291,20 @@ class MifareAttackEngine @Inject constructor() {
         }
     }
 
+    /** Quick single-key probe without connecting (caller must connect). Returns true if auth succeeds. */
+    fun probeKey(tag: Tag, sector: Int, key: ByteArray, useKeyA: Boolean): Boolean {
+        val mifare = MifareClassic.get(tag) ?: return false
+        return try {
+            if (!mifare.isConnected) mifare.connect()
+            if (useKeyA) mifare.authenticateSectorWithKeyA(sector, key)
+            else mifare.authenticateSectorWithKeyB(sector, key)
+        } catch (_: Exception) {
+            false
+        } finally {
+            try { mifare.close() } catch (_: Exception) {}
+        }
+    }
+
     private fun tryAuthenticate(mifare: MifareClassic, sector: Int, key: ByteArray, keyType: Int): Boolean {
         return try {
             if (keyType == 0) {

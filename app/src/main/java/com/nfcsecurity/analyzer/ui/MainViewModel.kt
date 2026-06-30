@@ -5,16 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nfcsecurity.analyzer.core.nfc.CardInfo
 import com.nfcsecurity.analyzer.core.nfc.NfcCardReader
 import com.nfcsecurity.analyzer.core.report.FullReport
 import com.nfcsecurity.analyzer.data.ScanHistoryEntity
 import com.nfcsecurity.analyzer.data.ScanRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,8 +31,14 @@ class MainViewModel @Inject constructor(
     private val _scanState = MutableLiveData<ScanState>(ScanState.Idle)
     val scanState: LiveData<ScanState> = _scanState
 
-    val scanHistory: StateFlow<List<ScanHistoryEntity>> = repository.allScans
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    private val _scanHistory = MutableLiveData<List<ScanHistoryEntity>>(emptyList())
+    val scanHistory: LiveData<List<ScanHistoryEntity>> = _scanHistory
+
+    init {
+        viewModelScope.launch {
+            repository.allScans.collect { _scanHistory.postValue(it) }
+        }
+    }
 
     fun processNfcTag(tag: Tag) {
         viewModelScope.launch(Dispatchers.IO) {
