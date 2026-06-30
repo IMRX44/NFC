@@ -71,12 +71,30 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Key Attack Module -->
+            <!-- Exploit Chain Module -->
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="■ KEY ATTACK" android:textColor="@color/neon_orange"
+                android:text="■ EXPLOIT CHAIN  — USE THIS FIRST"
+                android:textColor="@color/neon_green"
+                android:textSize="12sp" android:fontFamily="monospace"
+                android:layout_marginBottom="4dp"/>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Key Propagation → UID Derivation → App DB → S0 Crack → Magic Probe"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp" android:fontFamily="monospace"
+                android:layout_marginBottom="8dp"/>
+            <Button android:id="@+id/btn_exploit_chain"
+                android:layout_width="match_parent" android:layout_height="52dp"
+                android:text="⚡ EXPLOIT CHAIN — 80-90% SUCCESS RATE"
+                android:textColor="@color/bg_primary" android:textSize="12sp"
+                android:fontFamily="monospace" android:textStyle="bold"
+                android:background="@drawable/btn_attack"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Brute Force Module -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="■ BRUTE FORCE  (slow fallback)" android:textColor="@color/neon_orange"
                 android:textSize="12sp" android:fontFamily="monospace"
                 android:layout_marginBottom="8dp"/>
-
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="horizontal" android:layout_marginBottom="16dp">
                 <Button android:id="@+id/btn_dict_attack"
@@ -85,7 +103,7 @@
                     android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_cyber"/>
                 <Button android:id="@+id/btn_bruteforce"
                     android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1"
-                    android:text="BruteForce++" android:textColor="@color/bg_primary"
+                    android:text="Smart Brute++" android:textColor="@color/bg_primary"
                     android:textSize="11sp" android:fontFamily="monospace" android:background="@drawable/btn_attack"/>
             </LinearLayout>
 

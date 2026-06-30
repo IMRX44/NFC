@@ -12,6 +12,7 @@ import com.nfcsecurity.analyzer.core.attack.NdefWriteResult
 import com.nfcsecurity.analyzer.core.attack.NdefWriter
 import com.nfcsecurity.analyzer.core.attack.SmartKeyGenerator
 import com.nfcsecurity.analyzer.core.attack.UltralightEngine
+import com.nfcsecurity.analyzer.core.attack.VulnerabilityAttackEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,7 +33,8 @@ class AttackViewModel @Inject constructor(
     private val mifareEngine: MifareAttackEngine,
     private val ndefWriter: NdefWriter,
     private val ultralightEngine: UltralightEngine,
-    private val isoDepEngine: IsoDepEngine
+    private val isoDepEngine: IsoDepEngine,
+    private val vulnEngine: VulnerabilityAttackEngine
 ) : ViewModel() {
 
     private val _attackState = MutableLiveData<AttackUiState>(AttackUiState.Idle)
@@ -109,6 +111,28 @@ class AttackViewModel @Inject constructor(
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) _attackState.postValue(AttackUiState.Idle)
                 else _attackState.postValue(AttackUiState.Error(e.message ?: "BruteForce failed"))
+            }
+        }
+    }
+
+    // ── Exploit Chain (Vulnerability-based) ──────────────────────
+
+    fun runExploitChain(tag: Tag) {
+        foundKeys.clear()
+        activeJob = viewModelScope.launch(Dispatchers.IO) {
+            try {
+                vulnEngine.runExploitChain(tag, tag.id).collect { p ->
+                    if (p.isDone) {
+                        _attackState.postValue(AttackUiState.Success(p.summary))
+                    } else {
+                        val msg = "[${p.phase}] ${p.message}" +
+                                if (p.speedKps > 0) "  ${"%.1f".format(p.speedKps)} k/s" else ""
+                        _attackState.postValue(AttackUiState.Running(msg, p.progress))
+                    }
+                }
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) _attackState.postValue(AttackUiState.Idle)
+                else _attackState.postValue(AttackUiState.Error(e.message ?: "Exploit chain failed"))
             }
         }
     }

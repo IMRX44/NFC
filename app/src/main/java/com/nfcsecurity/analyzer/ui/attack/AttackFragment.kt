@@ -76,13 +76,20 @@ class AttackFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
+        binding.btnExploitChain.setOnClickListener {
+            requireTag { t ->
+                consoleViewModel.log("[*] Exploit Chain: Key Propagation → UID Derivation → App DB → S0 Crack")
+                attackViewModel.runExploitChain(t)
+            }
+        }
+
         binding.btnDictAttack.setOnClickListener {
             requireTag { t -> attackViewModel.runDictionaryAttack(t) }
         }
 
         binding.btnBruteforce.setOnClickListener {
             requireTag { t ->
-                consoleViewModel.log("[*] Starting SmartBruteForce — pattern + structured mode")
+                consoleViewModel.log("[*] Smart BruteForce: ${t.id.size * 8}-bit UID patterns + structured scan")
                 attackViewModel.runSmartBruteForce(t)
             }
         }
