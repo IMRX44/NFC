@@ -43,6 +43,7 @@
         <activity android:name=".ui.scan.ScanActivity" />
         <activity android:name=".ui.details.CardDetailsActivity" />
         <activity android:name=".ui.report.ReportActivity" />
+        <activity android:name=".ui.attack.AttackActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -13,5 +13,11 @@
     <string name="export_report">Export Report</string>
     <string name="no_ndef_records">No NDEF records found on this card</string>
     <string name="card_details">Card Details</string>
-    <string name="security_disclaimer">This tool performs read-only analysis for authorized security assessment only.</string>
+    <string name="security_disclaimer">For authorized security assessment only.</string>
+    <string name="active_testing">Active Testing</string>
+    <string name="key_attack">Default Key Attack</string>
+    <string name="dump_sectors">Dump Sectors</string>
+    <string name="write_block">Write Block</string>
+    <string name="write_ndef">Write NDEF</string>
+    <string name="custom_apdu">Custom APDU</string>
 </resources>

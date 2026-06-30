@@ -147,6 +147,14 @@ class CardDetailsActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
+        binding.btnActiveTesting.setOnClickListener {
+            val cardType = intent.getStringExtra(EXTRA_CARD_TYPE) ?: "Unknown"
+            val uid = intent.getStringExtra(EXTRA_UID) ?: ""
+            startActivity(Intent(this, com.nfcsecurity.analyzer.ui.attack.AttackActivity::class.java).apply {
+                putExtra(com.nfcsecurity.analyzer.ui.attack.AttackActivity.EXTRA_CARD_TYPE, cardType)
+                putExtra(com.nfcsecurity.analyzer.ui.attack.AttackActivity.EXTRA_UID, uid)
+            })
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
